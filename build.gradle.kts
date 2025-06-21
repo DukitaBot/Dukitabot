@@ -15,6 +15,8 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
+    implementation("org.reflections:reflections:0.10.2")
+
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:1.7.0")
     implementation("com.charleskorn.kaml:kaml:0.80.1")
