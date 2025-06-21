@@ -77,6 +77,8 @@ dependencies {
 
     implementation("com.vladsch.flexmark:flexmark-all:0.62.2")
 
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testImplementation("io.mockk:mockk:1.13.10")
