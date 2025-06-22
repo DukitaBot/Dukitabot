@@ -24,7 +24,7 @@ class AvatarCommand : ICommand {
                 return
             }
         } catch (e: Exception) {
-            event.channel.sendMessage("🔍 An error occurred.").queue()
+            event.channel.sendMessage("🔍 An error occurred whilst searching for the user.").queue()
             return
         }
 
@@ -56,7 +56,7 @@ class AvatarCommand : ICommand {
 
         val embed = EmbedBuilder().apply {
             setTitle("🖼️ Avatar of ${targetUser.name}")
-            setImage(avatarUrl) // A URL de 1024px é usada aqui
+            setImage(avatarUrl)
             setColor(if (targetUser.isBot) Color.PINK.rgb else Color(70, 130, 180).rgb)
 
             when {

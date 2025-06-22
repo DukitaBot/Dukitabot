@@ -19,34 +19,33 @@ class CommandHandler : ListenerAdapter() {
             val commandClasses = reflections.getSubTypesOf(ICommand::class.java)
 
             for (commandClass in commandClasses) {
-                if (commandClass.isInterface || commandClass.name == this::class.java.name) continue
+                if (commandClass.isInterface) continue
 
                 try {
                     val command = commandClass.getDeclaredConstructor().newInstance()
-                    commandMap[command.name] = command
-                    command.aliases.forEach { alias -> commandMap[alias] = command }
 
-                    println("✅ Command '${command.name}' started")
+                    commandMap[command.name.lowercase()] = command
+                    command.aliases.forEach { alias -> commandMap[alias.lowercase()] = command }
+
+                    println("✅ Command '${command.name}' loaded.")
                 } catch (e: Exception) {
-                    println("❌ Ops! '${commandClass.simpleName}': ${e.message}")
+                    println("❌ Failed to load command '${commandClass.simpleName}': ${e.message}")
                 }
             }
-            println("✨ ${commandMap.values.distinct().size} commands loaded successfully")
+            println("✨ ${commandMap.values.distinct().size} commands loaded successfully.")
         } catch (e: Exception) {
-            println("🚨 Crash: ${e.message}")
+            println("🚨 A critical error occurred during command scanning: ${e.message}")
         }
     }
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
         if (event.author.isBot || event.isWebhookMessage) return
+        if (!event.message.contentRaw.startsWith(PREFIX)) return
 
-        val message = event.message.contentRaw
+        val messageContent = event.message.contentRaw
 
-        if (!message.startsWith(PREFIX)) {
-            return
-        }
+        val parts = messageContent.removePrefix(PREFIX).trim().split(Regex("\\s+"))
 
-        val parts = message.removePrefix(PREFIX).trim().split(Regex("\\s+"))
         val commandName = parts[0].lowercase()
         val args = parts.drop(1)
 

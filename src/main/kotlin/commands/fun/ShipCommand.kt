@@ -20,22 +20,18 @@ class ShipCanvasCommand : ICommand {
     override val aliases: List<String> = listOf("shipar", "shippar")
 
     override fun execute(event: MessageReceivedEvent, args: List<String>) {
-        // Obter usuários mencionados ou por ID/nickname
         val mentionedUsers = event.message.mentions.users.toMutableList()
         val members = event.guild.members
 
-        // Verificar argumentos que não são menções
         args.filter { arg ->
             !arg.startsWith("<@") && arg != name && !aliases.contains(arg)
         }.forEach { arg ->
-            // Tentar encontrar por ID
             try {
                 val user = event.jda.retrieveUserById(arg).complete()
                 if (user != null && !mentionedUsers.any { it.id == user.id }) {
                     mentionedUsers.add(user)
                 }
             } catch (e: Exception) {
-                // Se não encontrar por ID, tentar por nickname
                 val member = members.firstOrNull { m ->
                     m.nickname?.equals(arg, ignoreCase = true) == true ||
                             m.user.name.equals(arg, ignoreCase = true)

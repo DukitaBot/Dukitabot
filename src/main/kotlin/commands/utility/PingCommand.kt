@@ -9,6 +9,7 @@ class Ping : ICommand {
 
     override fun execute(event: MessageReceivedEvent, args: List<String>) {
         val gatewayPing = event.jda.gatewayPing
-        event.channel.sendMessage(" API: `${gatewayPing}ms`").queue()
+
+        event.channel.sendMessage("🏓 API Latency: `${gatewayPing}ms`").queue()
     }
 }

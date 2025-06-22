@@ -1,15 +1,10 @@
 package com.dukita
 
-// Config
 import io.github.cdimascio.dotenv.dotenv
-
-// JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
-
-// Reflections
 import org.reflections.Reflections
 
 fun main() {
@@ -18,7 +13,7 @@ fun main() {
         ignoreIfMissing = true
     }
 
-    val token = dotenv["DISCORD_TOKEN"] ?: error("There was an error finding the token 🛑")
+    val token = dotenv["DISCORD_TOKEN"] ?: error("Discord token not found in the .env file 🛑")
 
     val builder = JDABuilder.createDefault(token)
         .setActivity(
@@ -26,24 +21,24 @@ fun main() {
         )
         .enableIntents(GatewayIntent.MESSAGE_CONTENT)
 
+
     try {
         val reflections = Reflections("com.dukita.events")
-
         val eventClasses = reflections.getSubTypesOf(ListenerAdapter::class.java)
 
-        println("🔎 Searching for events")
+        println("🔎 Searching for event listeners...")
 
         for (eventClass in eventClasses) {
             try {
                 val listener = eventClass.getDeclaredConstructor().newInstance()
                 builder.addEventListeners(listener)
-                println("✅ Listener '${eventClass.simpleName}' started")
+                println("✅ Listener '${eventClass.simpleName}' registered successfully.")
             } catch (e: Exception) {
-                println("❌ Ops! '${eventClass.simpleName}': ${e.message}")
+                println("❌ Failed to register listener '${eventClass.simpleName}': ${e.message}")
             }
         }
     } catch (e: Exception) {
-        println("🚨 Crash: ${e.message}")
+        println("🚨 A critical error occurred during listener scanning: ${e.message}")
     }
 
     val jda = builder.build()
