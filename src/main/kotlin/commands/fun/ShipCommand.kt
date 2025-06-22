@@ -10,7 +10,6 @@ import java.awt.geom.GeneralPath
 import java.awt.geom.Point2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.net.URL
 import javax.imageio.ImageIO
 import kotlin.math.*
@@ -21,7 +20,34 @@ class ShipCanvasCommand : ICommand {
     override val aliases: List<String> = listOf("shipar", "shippar")
 
     override fun execute(event: MessageReceivedEvent, args: List<String>) {
-        val mentionedUsers = event.message.mentions.users
+        // Obter usuários mencionados ou por ID/nickname
+        val mentionedUsers = event.message.mentions.users.toMutableList()
+        val members = event.guild.members
+
+        // Verificar argumentos que não são menções
+        args.filter { arg ->
+            !arg.startsWith("<@") && arg != name && !aliases.contains(arg)
+        }.forEach { arg ->
+            // Tentar encontrar por ID
+            try {
+                val user = event.jda.retrieveUserById(arg).complete()
+                if (user != null && !mentionedUsers.any { it.id == user.id }) {
+                    mentionedUsers.add(user)
+                }
+            } catch (e: Exception) {
+                // Se não encontrar por ID, tentar por nickname
+                val member = members.firstOrNull { m ->
+                    m.nickname?.equals(arg, ignoreCase = true) == true ||
+                            m.user.name.equals(arg, ignoreCase = true)
+                }
+                member?.user?.let { user ->
+                    if (!mentionedUsers.any { it.id == user.id }) {
+                        mentionedUsers.add(user)
+                    }
+                }
+            }
+        }
+
         val isBotInvolved = mentionedUsers.any { it.id == event.jda.selfUser.id }
 
         if (mentionedUsers.size == 1 && mentionedUsers[0].id == event.author.id) {
@@ -29,7 +55,7 @@ class ShipCanvasCommand : ICommand {
             return
         }
         if (mentionedUsers.size !in 1..2) {
-            event.channel.sendMessage("💢 Mention 1 or 2 users to ship!").queue()
+            event.channel.sendMessage("💢 silly `").queue()
             return
         }
 
@@ -85,19 +111,6 @@ class ShipCanvasCommand : ICommand {
         val randomBoost = Random.nextInt(0, 21)
 
         return (nameCompat * 0.6 + timeFactor * 0.3 + randomBoost * 0.1).toInt().coerceIn(0, 100)
-    }
-
-    private fun getChemistryEmoji(percentage: Int): String {
-        return when {
-            percentage == 100 -> "💯✨"
-            percentage >= 95 -> "🔥❤️‍🔥"
-            percentage >= 85 -> "💘😍"
-            percentage >= 70 -> "❤️💕"
-            percentage >= 50 -> "✨👍"
-            percentage >= 30 -> "😊🤞"
-            percentage >= 10 -> "🤷💤"
-            else -> "💔☠️"
-        }
     }
 
     private fun getFunnyComment(percentage: Int): String {
